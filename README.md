@@ -1,5 +1,5 @@
 # Full Body FPS Controller
-A completely refactored, Open Source Full Body FPS Controller.  Inspired by Darktide and DISHONORED/ Dark Messiah- now public on my Github!  It uses TWO Armatures to layer Generic "Arms-Only" FPS Animations, without losing any of the "Full-Body" Animations underneath.
+A completely refactored, Open Source Full Body FPS Controller.  Inspired by Darktide and DISHONORED/ Dark Messiah, uses TWO armatures to layer Generic "Arms-Only" FPS Animations, without losing any of the "Full-Body" Animations underneath.
 Also inspired by this Bungie GDC presentation on Destiny 2 First Person animation:
 https://www.youtube.com/watch?v=CXFLu8cityA
 
