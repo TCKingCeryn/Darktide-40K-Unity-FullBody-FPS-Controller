@@ -1,7 +1,9 @@
 # Full Body FPS Controller
 A completely refactored, Open Source Full Body FPS Controller.  
 Inspired by Darktide and DISHONORED, uses TWO armatures to layer Generic "Arms-Only" FPS Animations, without losing any of the "Full-Body" Animations underneath.
-See also this Bungie GDC presentation on Destiny 2 First Person animation:
+
+
+See also: this Bungie GDC presentation on Destiny 2 First Person animation
 https://www.youtube.com/watch?v=CXFLu8cityA
 
 ![asdasd](https://github.com/TCKingCeryn/Full-Body-FPS-Controller/assets/128671881/f0c586f4-968d-4f0b-b8bf-5429ef28cf06)
