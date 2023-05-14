@@ -1,15 +1,15 @@
 # Darktide 40K in Unity - Full Body FPS Controller
-A completely Open Source, Full-Body FPS Controller for Unity. Based heavily on "Warhammer 40k: Darktide."  
+A completely Open-Source, Full Body FPS Controller for Unity. Build upon it however you like!
+Based heavily on "Warhammer 40k: Darktide." 
 Includes a well-organized lightweight Custom AI System, a working Melee/Shooter weapon system, and a preview version of a GPU Skinned Mesh Instancing shader for large crowds of Enemies. 
 Uses two separate armatures to layer Generic "Arms-Only" FPS Animations on top of the "Full-Body" Animations underneath.
-
-See this Bungie GDC presentation on Destiny 2 First Person animation for more information:
-https://www.youtube.com/watch?v=CXFLu8cityA
 
 ![dfgfgdf](https://github.com/TCKingCeryn/Full-Body-FPS-Controller/assets/128671881/8f349920-ef86-44f2-a62c-3a10b42a6bd7)
 
 ![adsasdasdas](https://github.com/TCKingCeryn/Full-Body-FPS-Controller/assets/128671881/042742d2-caed-43b7-8ccb-a78ebc01433f)
 
+See this Bungie GDC presentation on Destiny 2 First Person animation for more information:
+https://www.youtube.com/watch?v=CXFLu8cityA
 
 
 ## Changelog
