@@ -17,6 +17,12 @@ Uses two separate armatures to layer Generic "Arms-Only" FPS Animations on top o
 
 
 
+If just you wanna test out the current build, download this Zip and give it a whirl:
+https://www.dropbox.com/s/4td26ounstbjk42/UntitledUnityFPSTest.zip?dl=0
+
+
+
+
 ## Changelog
 Current Version: v1.1
 
