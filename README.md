@@ -3,6 +3,9 @@ A completely Open-Source, Full Body FPS Controller for Unity. Build upon it howe
 
 Based heavily on "Warhammer 40k: Darktide." 
 
+See this Bungie GDC presentation on Destiny 2 First Person animation for more information:
+https://www.youtube.com/watch?v=CXFLu8cityA
+
 ![klnklnlk](https://github.com/TCKingCeryn/Darktide-40K-in-Unity-FullBody-FPS-Controller/assets/128671881/5f1dbf11-b622-4ad7-b5a4-d43eb5ce7394)
 
 
@@ -12,10 +15,8 @@ Uses two separate armatures to layer Generic "Arms-Only" FPS Animations on top o
 
 ![dfgfgdf](https://github.com/TCKingCeryn/Full-Body-FPS-Controller/assets/128671881/8f349920-ef86-44f2-a62c-3a10b42a6bd7)
 
-![adsasdasdas](https://github.com/TCKingCeryn/Full-Body-FPS-Controller/assets/128671881/042742d2-caed-43b7-8ccb-a78ebc01433f)
+![asdasdas](https://github.com/TCKingCeryn/Darktide-40K-in-Unity-FullBody-FPS-Controller/assets/128671881/ec5f082a-a245-40de-a313-aa3034b3f835)
 
-See this Bungie GDC presentation on Destiny 2 First Person animation for more information:
-https://www.youtube.com/watch?v=CXFLu8cityA
 
 
 ## Changelog
