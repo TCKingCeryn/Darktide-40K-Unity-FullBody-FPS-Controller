@@ -1,6 +1,5 @@
 # Darktide 40K in Unity - Full Body FPS Controller
 A completely Open-Source, Full Body FPS Controller for Unity. Build upon it however you like!
-
 Based heavily on "Warhammer 40k: Darktide." 
 
 See this Bungie GDC presentation on Destiny 2 First Person animation for more information:
