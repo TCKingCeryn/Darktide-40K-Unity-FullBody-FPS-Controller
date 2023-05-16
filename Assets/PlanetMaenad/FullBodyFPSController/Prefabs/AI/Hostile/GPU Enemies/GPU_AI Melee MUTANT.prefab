@@ -94,7 +94,6 @@ GameObject:
   - component: {fileID: 1117434704913132640}
   - component: {fileID: 2470106766670713357}
   - component: {fileID: 4422626559459466988}
-  - component: {fileID: 4147750277331125440}
   m_Layer: 0
   m_Name: MESH
   m_TagString: Untagged
@@ -168,81 +167,6 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!114 &4147750277331125440
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4824882094709493726}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6ee41c353d7c7324089c372d35c33e26, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  MeshRenderer: {fileID: 4422626559459466988}
-  FrameInformations:
-  - Name: Run
-    FrameCount: 20
-    StartFrame: 1
-    EndFrame: 20
-  - Name: Idle
-    FrameCount: 148
-    StartFrame: 21
-    EndFrame: 168
-  - Name: RunSword1L
-    FrameCount: 24
-    StartFrame: 169
-    EndFrame: 192
-  - Name: RunSword1R
-    FrameCount: 24
-    StartFrame: 193
-    EndFrame: 216
-  - Name: RunSword2L
-    FrameCount: 18
-    StartFrame: 217
-    EndFrame: 234
-  - Name: RunSword2R
-    FrameCount: 18
-    StartFrame: 235
-    EndFrame: 252
-  - Name: SwordSlash1
-    FrameCount: 56
-    StartFrame: 253
-    EndFrame: 308
-  - Name: SwordSlash2
-    FrameCount: 54
-    StartFrame: 309
-    EndFrame: 362
-  - Name: SwordSlash3L
-    FrameCount: 38
-    StartFrame: 363
-    EndFrame: 400
-  - Name: SwordSlash3R
-    FrameCount: 65
-    StartFrame: 401
-    EndFrame: 465
-  - Name: Walk
-    FrameCount: 29
-    StartFrame: 466
-    EndFrame: 494
-  - Name: Hit
-    FrameCount: 19
-    StartFrame: 495
-    EndFrame: 513
-  - Name: HitBig
-    FrameCount: 45
-    StartFrame: 514
-    EndFrame: 558
-  - Name: TPose
-    FrameCount: 1
-    StartFrame: 559
-    EndFrame: 559
-  UseSingleStartingAnimation: 0
-  SingleStartingAnimation: 
-  ManualAnimationName: 
-  CurrentPlayingAnimation: 
-  CurrentPlayingOffset: 0
 --- !u!1 &6301547752659746004
 GameObject:
   m_ObjectHideFlags: 0
@@ -320,7 +244,7 @@ GameObject:
   - component: {fileID: 6615194081831843653}
   - component: {fileID: 1250224400119340979}
   - component: {fileID: 4731193640334988185}
-  - component: {fileID: 8471693042032571227}
+  - component: {fileID: 8047428840438204002}
   m_Layer: 10
   m_Name: GPU_AI Melee MUTANT
   m_TagString: Enemy
@@ -391,7 +315,7 @@ NavMeshAgent:
   m_Acceleration: 80
   avoidancePriority: 50
   m_AngularSpeed: 200
-  m_StoppingDistance: 2
+  m_StoppingDistance: 1.25
   m_AutoTraverseOffMeshLink: 1
   m_AutoBraking: 1
   m_AutoRepath: 1
@@ -510,7 +434,6 @@ MonoBehaviour:
   isAI: 1
   CharacterAnimator: {fileID: 0}
   HUDController: {fileID: 8005007585896588496}
-  KillCounter: {fileID: 0}
   health: 65
   fillAmount: 1
   regen: 0
@@ -543,7 +466,7 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
-  IgnoreReaction: 0
+  IsBlocking: 0
   playNoiseOnHurt: 0
   percentageToPlay: 0.4
   hurtSource: {fileID: 6615194081831843653}
@@ -635,7 +558,7 @@ MonoBehaviour:
   ManualAnimationName: SwordSlash1
   CurrentPlayingAnimation: 
   CurrentPlayingOffset: 0
---- !u!114 &8471693042032571227
+--- !u!114 &8047428840438204002
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -644,11 +567,18 @@ MonoBehaviour:
   m_GameObject: {fileID: 7989615791997458652}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b41510afe4adc6f4b8b4437888818d91, type: 3}
+  m_Script: {fileID: 11500000, guid: 565527321d8ea624084b7c2e85422d8c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _rigidbody: {fileID: 0}
   agent: {fileID: 8122477291733904347}
   GPUMeshAnimator: {fileID: 4731193640334988185}
+  HealthControl: {fileID: 0}
+  CurrentVelocity: 0
+  UseWander: 1
+  wanderSpeed: 2
+  wanderRadius: 15
+  wanderTimer: 10
   IdleNames:
   - Idle
   WalkNames:
@@ -657,11 +587,7 @@ MonoBehaviour:
   - RunSword1R
   - RunSword2L
   - RunSword2R
-  CurrentVelocity: 0
-  UseWander: 1
-  wanderSpeed: 3
-  wanderRadius: 15
-  wanderTimer: 10
+  CurrentTarget: {fileID: 0}
   DetectEyes: {fileID: 6829480739603848490}
   DetectionLayers:
     serializedVersion: 2
@@ -669,33 +595,32 @@ MonoBehaviour:
   DetectionTags:
   - Player
   - Companion
-  CurrentTarget: {fileID: 0}
-  DetectionFrequencyTimer: 1.5
-  DetectionRadius: 15
+  DetectionFrequencyTimer: 2
+  DetectionRadius: 75
   UseAttacks: 1
   AttackFrequencyTimer: 2
-  AttackDistance: 3
+  AttackDistance: 2
   _randomAttacks:
   - AttackName: SwordSlash1
     AttackDamage: 25
     AttackRayOrigin: {fileID: 3442892305238618673}
-    AttackRayDelay: 0.2
-    RaycastDistance: 0.25
+    AttackRayDelay: 0.5
+    RaycastDistance: 1
   - AttackName: SwordSlash2
     AttackDamage: 25
     AttackRayOrigin: {fileID: 3442892305238618673}
-    AttackRayDelay: 0.2
-    RaycastDistance: 0.25
+    AttackRayDelay: 0.5
+    RaycastDistance: 1
   - AttackName: SwordSlash3L
     AttackDamage: 25
     AttackRayOrigin: {fileID: 3442892305238618673}
-    AttackRayDelay: 0.2
-    RaycastDistance: 0.25
+    AttackRayDelay: 0.5
+    RaycastDistance: 1
   - AttackName: SwordSlash3R
-    AttackDamage: 0.2
+    AttackDamage: 25
     AttackRayOrigin: {fileID: 3442892305238618673}
-    AttackRayDelay: 0.2
-    RaycastDistance: 0.25
+    AttackRayDelay: 0.5
+    RaycastDistance: 1
   CanAttack: 1
   IsAttacking: 0
   OnIdle:
@@ -755,9 +680,7 @@ MonoBehaviour:
   uiHealth: {fileID: 0}
   uiHealthSlider: {fileID: 0}
   HealthMeshFill: {fileID: 1606854886021026209}
-  uiBullets: {fileID: 0}
-  DamageCrosshairParent: {fileID: 0}
-  DamageCrosshair: {fileID: 0}
+  HealthTextMesh: {fileID: 0}
 --- !u!1 &8534169441994972101
 GameObject:
   m_ObjectHideFlags: 0

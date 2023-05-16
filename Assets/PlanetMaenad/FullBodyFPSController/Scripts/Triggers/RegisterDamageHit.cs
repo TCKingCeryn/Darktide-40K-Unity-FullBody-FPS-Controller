@@ -6,30 +6,39 @@ namespace PlanetMaenad.FPS
 {
     public class RegisterDamageHit : MonoBehaviour
     {
-        public FPSPlayerController PlayerController;
+        public bool AutoDestroy;
+        [Space(10)]
+
+
+        public bool IsPlayer;
+        public DEMOExamplePlayer PlayerController;
+        [Space(5)]
+        public GameObject DamageCrosshair;
+        [Space(10)]
+
+
         public LayerMask HitLayers = -1;
         public string[] DamageTags;
         [Space(10)]
 
-        public GameObject DamageCrosshair;
-        [Space(5)]
 
-
-        public int damage;
+        public int Damage;
         public float hitVolume = .35f;
         public float hitForce = 5f;
         public AudioClip[] hitSounds;
         [Space(10)]
 
-
-        public bool AutoDestroy;
+        public bool IsBigHit;
         public GameObject impactParticle;
         public GameObject impactBloodParticle;
         public float impactDespawnTime = 3f;
 
 
 
+        void Start()
+        {
 
+        }
 
         void OnCollisionEnter(Collision other)
         {
@@ -77,9 +86,16 @@ namespace PlanetMaenad.FPS
             if (other.GetComponentInParent<HealthController>())
             {
                 var parentHealth = other.GetComponentInParent<HealthController>();
-                parentHealth.Damage(transform.forward * 360, hitForce, damage);
+                parentHealth.Damage(transform.forward * 360, hitForce, Damage);
 
-                if (DamageCrosshair && PlayerController) Instantiate(DamageCrosshair, PlayerController.healthControl.HUDController.DamageCrosshairParent.position, DamageCrosshair.transform.rotation, PlayerController.healthControl.HUDController.DamageCrosshairParent);
+                if (IsPlayer)
+                {
+                    if (DamageCrosshair && PlayerController)
+                    {
+                        Instantiate(DamageCrosshair, PlayerController.DamageCrosshairHolder.position, DamageCrosshair.transform.rotation, PlayerController.DamageCrosshairHolder);
+                    }
+                }
+
 
                 //Spawn blood 
                 GameObject tempImpact;

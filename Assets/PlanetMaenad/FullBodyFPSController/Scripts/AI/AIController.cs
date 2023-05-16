@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.Events;
@@ -13,7 +14,6 @@ namespace PlanetMaenad.FPS
         public HealthController HealthControl;
         [Space(5)]
         public float CurrentVelocity;
-        public float health = 100;
         [Space(10)]
 
 
@@ -24,6 +24,7 @@ namespace PlanetMaenad.FPS
 
         public bool UseWander = true;
         public Vector3 wanderPoint;
+        public float MoveSpeed = 1.5f;
         public float wanderRadius = 5;
         public bool moving;
         public bool isAttacking;
@@ -32,7 +33,6 @@ namespace PlanetMaenad.FPS
 
         public float m_ForwardAmount;
         public float m_TurnAmount;
-        public float moveDamping = 0.4f;
         [Space(10)]
 
 
@@ -43,11 +43,11 @@ namespace PlanetMaenad.FPS
         public bool overrideAttack;
         [Space(10)]
 
-
+        public Transform CurrentTarget;
+        [Space(5)]
         public Transform DetectEyes;
         public LayerMask DetectionLayers;
         public string[] DetectionTags;
-        public Transform CurrentTarget;
         [Space(5)]
         public float DetectionFrequencyTimer = 1.5f;
         public float DetectionRadius = 15f;
@@ -69,15 +69,19 @@ namespace PlanetMaenad.FPS
         [Space(10)]
 
 
+        public Vector3 AimOffset = new Vector3(0, .25f, 0);
+
+
+
+
+
+
+        internal bool wanderPointSet;
+        internal Vector3 lastPos;    
+        internal Collider[] PotentialTargets;
 
         internal WaitForSeconds DetectionFrequency;
         internal WaitForSeconds AttackFrequency;
-
-        internal Collider[] PotentialTargets;
-
-        internal bool wanderPointSet;
-        internal Vector3 lastPos;
-
 
 
         [System.Serializable]
@@ -90,11 +94,15 @@ namespace PlanetMaenad.FPS
         }
 
 
+
+
         void OnEnable()
         {
             if (!UseWander && m_Animator) m_Animator.applyRootMotion = false;
 
             if (HealthControl) HealthControl.OnReceiveDamage.AddListener(AttackCancel);
+
+            if (agent) agent.speed = MoveSpeed;
 
             DetectionFrequencyTimer = Random.Range(DetectionFrequencyTimer - 0.25f, _randomAttacks.Length + 0.25f);
             DetectionFrequency = new WaitForSeconds(DetectionFrequencyTimer);
@@ -102,56 +110,37 @@ namespace PlanetMaenad.FPS
 
             StartCoroutine(CheckForTargets());
         }
-
         void Update()
         {
-            //targetInSightRange = Physics.CheckSphere(transform.position, DetectionRadius, enemyLayers);
-            //targetInAttackRange = Physics.CheckSphere(transform.position, AttackDistance, enemyLayers);
-
             if (CurrentTarget)
             {
-                if (!targetInSightRange && !targetInAttackRange) Patroling();
-                if (!targetInSightRange && !targetInAttackRange && isAttacking) Patroling();
+                if (!targetInSightRange && !targetInAttackRange && UseWander) Patroling();
+                if (!targetInSightRange && !targetInAttackRange && UseWander && isAttacking) Patroling();
 
-                if (targetInSightRange && !targetInAttackRange) ChaseTarget(); 
-                if (targetInSightRange && !targetInAttackRange && isAttacking) ChaseTarget(); 
-
-                //if (targetInAttackRange && targetInSightRange) AttackTargetFixed();
+                if (targetInSightRange && !targetInAttackRange && MoveWhileAttacking) ChaseTarget(); 
+                if (targetInSightRange && !targetInAttackRange && MoveWhileAttacking && isAttacking) ChaseTarget(); 
             }
-            //else
-            //{
-            //    //Immeditaley attack target if attacked
-            //    if (!targetInAttackRange && target != null) ChaseTarget();
-            //    if (targetInAttackRange) overrideAttack = false;
-            //
 
 
-            if (UseWander || MoveWhileAttacking)
+            if (agent && agent.enabled && agent.isOnNavMesh) CurrentVelocity = agent.velocity.magnitude;
+
+            m_TurnAmount = transform.rotation.y;
+
+            if (transform.position != lastPos)
             {
-                if (agent && agent.enabled && agent.isOnNavMesh) CurrentVelocity = agent.velocity.magnitude;
-
-                //Update the turn animation to our y axis rotation
-                m_TurnAmount = transform.rotation.y;
-
-                //Check for movement and play the walking animation
-                if (transform.position != lastPos)
-                {
-                    m_ForwardAmount = 1 * moveDamping;
-                    moving = true;
-                }
-                else
-                {
-                    m_ForwardAmount = 0;
-                    moving = false;
-                }
+                m_ForwardAmount = 1 * CurrentVelocity;
+                moving = true;
+            }
+            else
+            {
+                m_ForwardAmount = 0;
+                moving = false;
             }
 
             lastPos = transform.position;
 
-            //Update our animator constantly
             UpdateAnimator();
         }
-
 
         IEnumerator CheckForTargets()
         {
@@ -164,53 +153,48 @@ namespace PlanetMaenad.FPS
                 //Found Colliders
                 if (PotentialTargets.Length > 0)
                 {
-                    //Check Each Target
-                    for (int t = 0; t < PotentialTargets.Length; t++)
+                    //Check Each Tags
+                    for (int i = 0; i < DetectionTags.Length; i++)
                     {
-                        //Check Each Tags
-                        for (int i = 0; i < DetectionTags.Length; i++)
+                        //Tag Match
+                        if (PotentialTargets[0].transform.CompareTag(DetectionTags[i]))
                         {
-                            //Tag Match
-                            if (PotentialTargets[t].transform.CompareTag(DetectionTags[i]))
+                            CurrentTarget = PotentialTargets[0].transform;
+
+                            Vector3 rayOrigin = DetectEyes.position;
+                            RaycastHit hit;                        
+                            var rayDirection = (CurrentTarget.position + AimOffset) - DetectEyes.position;
+
+                            //Hits an Object
+                            if (Physics.Raycast(rayOrigin, rayDirection, out hit, DetectionRadius + 1, DetectionLayers))
                             {
-                                CurrentTarget = PotentialTargets[t].transform;
+                                var hitTransform = hit.collider.transform;
 
-                                Vector3 rayOrigin = DetectEyes.position;
-                                RaycastHit hit;
-
-                                var rayDirection = CurrentTarget.position - DetectEyes.position;
-
-                                //Hits an Object
-                                if (Physics.Raycast(rayOrigin, rayDirection, out hit, DetectionRadius + 1, DetectionLayers))
+                                //Can See Target
+                                if (hitTransform == CurrentTarget)
                                 {
-                                    var hitTransform = hit.collider.transform;
+                                    if (MoveWhileAttacking && agent.isOnNavMesh && CurrentTarget) agent.SetDestination(CurrentTarget.position);
 
-                                    //Can See Target
-                                    if (hitTransform == CurrentTarget)
-                                    {
-                                        if (MoveWhileAttacking && CurrentTarget) agent.SetDestination(CurrentTarget.position);
-
-                                        targetInSightRange = true;
-
-                                        if (UseAttacks)
-                                        {
-                                            StartCoroutine(CheckAttackDistance());
-                                        }
-                                    }
-                                }
-                                else
-                                {
-                                    //No Target Found
-                                    CurrentTarget = null;
-
-                                    targetInSightRange = false;
-                                    targetInAttackRange = false;
+                                    targetInSightRange = true;
 
                                     if (UseAttacks)
                                     {
-                                        StopCoroutine(CheckAttackDistance());
-                                        AttackCancel();
+                                        StartCoroutine(CheckAttackDistance());
                                     }
+                                }
+                            }
+                            else
+                            {
+                                //No Target Found
+                                CurrentTarget = null;
+
+                                targetInSightRange = false;
+                                targetInAttackRange = false;
+
+                                if (UseAttacks)
+                                {
+                                    StopCoroutine(CheckAttackDistance());
+                                    AttackCancel();
                                 }
                             }
                         }
@@ -234,7 +218,7 @@ namespace PlanetMaenad.FPS
 
                 if (CurrentTarget != null)
                 {
-                    if (MoveWhileAttacking && CurrentTarget) agent.SetDestination(CurrentTarget.position);
+                    if (MoveWhileAttacking && agent.isOnNavMesh && CurrentTarget) agent.SetDestination(CurrentTarget.position);
 
                     targetInSightRange = true;
 
@@ -249,7 +233,7 @@ namespace PlanetMaenad.FPS
         {
             while (enabled)
             {
-                yield return DetectionFrequency;
+                yield return AttackFrequency;
 
                 //Has Target
                 if (CurrentTarget)
@@ -260,7 +244,7 @@ namespace PlanetMaenad.FPS
                     {
                         transform.LookAt(CurrentTarget, Vector3.up);
 
-                        AttackTargetFixed();
+                        AttackTarget();
 
                         targetInAttackRange = true;
                     }
@@ -275,51 +259,11 @@ namespace PlanetMaenad.FPS
         }
 
 
-        //public void DoRandomAttack()
-        //{
-        //    if (_randomAttacks.Length > 0)
-        //    {
-        //        //StartCoroutine(AttackResetDelay());
-        //    }
-        //}
-
-        //IEnumerator AttackResetDelay()
-        //{
-        //    while (enabled)
-        //    {
-        //        OnAttack.Invoke();
-
-        //        transform.LookAt(CurrentTarget, Vector3.up);
-
-        //        //Select Attack
-        //        var selectedAttack = Random.Range(0, _randomAttacks.Length);
-
-         
-        //        //Disable Attack
-        //        CanAttack = false;
-        //        IsAttacking = true;
-
-        //        yield return AttackFrequency;
-
-
-        //        selectedAttack = Random.Range(0, _randomAttacks.Length);
-        //        CanAttack = true;
-
-        //        float dist = Vector3.Distance(CurrentTarget.position, transform.position);
-
-        //        if (dist > AttackDistance)
-        //        {
-        //            IsAttacking = false;
-        //            yield break;
-        //        }
-
-        //    }
-        //}
-
-        public void AttackTargetFixed()
+        void AttackTarget()
         {
             if (!MoveWhileAttacking) agent.SetDestination(transform.position);
-            if (MoveWhileAttacking && m_Animator) m_Animator.applyRootMotion = true;
+
+            OnAttack.Invoke();
 
             if (CurrentTarget)
             {
@@ -328,42 +272,22 @@ namespace PlanetMaenad.FPS
 
                 isAttacking = true;
 
-                //shootPoint.LookAt(target);
-                //AiGun.Fire();
+                //if (m_Animator && !m_Animator.GetCurrentAnimatorStateInfo(0).IsName("RandomAttack"));
             }
         }
-        public void AttackTarget()
-        {
-            if (MoveWhileAttacking && m_Animator) m_Animator.applyRootMotion = true;
-
-            //Move and shoot
-            if (CurrentTarget)
-            {
-                Vector3 targetPostitionXZ = new Vector3(CurrentTarget.position.x, transform.position.y, CurrentTarget.position.z);
-                transform.LookAt(targetPostitionXZ);
-
-                isAttacking = true;
-
-                //shootPoint.LookAt(target);
-                //AiGun.Fire();
-            }
-        }
-        public void AttackCancel()
+        void AttackCancel()
         {
             isAttacking = false;
             overrideAttack = false;
-
-            if (MoveWhileAttacking && !UseWander && m_Animator) m_Animator.applyRootMotion = false;
         }
-
 
 
         public void Patroling()
         {
 
-            if (!wanderPointSet) SearchwanderPoint();
+            if (!wanderPointSet) SearchWanderPoint();
 
-            if (wanderPointSet && UseWander)
+            if (wanderPointSet && UseWander && agent.isOnNavMesh)
                 agent.SetDestination(wanderPoint);
 
             Vector3 distanceTowanderPoint = transform.position - wanderPoint;
@@ -372,7 +296,7 @@ namespace PlanetMaenad.FPS
             if (distanceTowanderPoint.magnitude < 1f)
                 wanderPointSet = false;
         }
-        public void SearchwanderPoint()
+        public void SearchWanderPoint()
         {
             //Calculate random point in range
             float randomZ = Random.Range(-wanderRadius, wanderRadius);
@@ -385,9 +309,8 @@ namespace PlanetMaenad.FPS
         }
         public void ChaseTarget()
         {
-            if (MoveWhileAttacking) agent.SetDestination(CurrentTarget.position);
+            if (MoveWhileAttacking && agent.isOnNavMesh) agent.SetDestination(CurrentTarget.position);
         }
-
 
         public void UpdateAnimator()
         {
@@ -399,4 +322,5 @@ namespace PlanetMaenad.FPS
         }
 
     }
+
 }

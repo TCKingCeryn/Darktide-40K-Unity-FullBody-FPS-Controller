@@ -224,7 +224,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2164040, guid: 5302535af1044152a457ed104f1f4b91, type: 2}
+  - {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -268,8 +268,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: 00
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 5302535af1044152a457ed104f1f4b91, type: 2}
-  m_sharedMaterial: {fileID: 2164040, guid: 5302535af1044152a457ed104f1f4b91, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -513,7 +513,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2164040, guid: 5302535af1044152a457ed104f1f4b91, type: 2}
+  - {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -557,8 +557,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: 000
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 5302535af1044152a457ed104f1f4b91, type: 2}
-  m_sharedMaterial: {fileID: 2164040, guid: 5302535af1044152a457ed104f1f4b91, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -764,49 +764,68 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   PlayerController: {fileID: 0}
-  FPSController: {fileID: 0}
-  BodyAnimator: {fileID: 0}
-  ArmsAnimator: {fileID: 0}
+  PlayerArmsController: {fileID: 0}
+  WeaponAdjust: {fileID: 8893484672054188677}
   mainCam: {fileID: 0}
+  AttackButton: 323
+  AimButton: 324
   UseFPSArmsConstant: 1
   UseFPSArmsOnAttack: 1
   UseFPSArmsOnAim: 1
-  HUDController: {fileID: 0}
-  WeaponAdjust: {fileID: 8893484672054188677}
-  aimCamPosition: {x: 0.0975, y: 0.025, z: 0}
-  aimCamOffset: {x: 0, y: 0, z: 0}
-  UseRandomAttack: 0
-  MinRandom: 0
-  MaxRandom: 0
   MoveSetID: 3
   Weapon: 1
   Damage: 50
   SecondaryObjects: []
   Hitboxes: []
+  UseRandomAttack: 0
+  MinRandom: 0
+  MaxRandom: 0
+  aimCamPosition: {x: 0.0975, y: 0.025, z: 0}
+  aimCamOffset: {x: 0, y: 0, z: 0}
+  originalCamFov: 90
+  zoomInAmount: 50
+  aimTime: 5
+  aimInOutDuration: 0.1
   attacking: 0
   swapping: 0
   sprinting: 0
   aiming: 0
-  originalCamFov: 90
-  aimTime: 5
-  zoomInAmount: 50
-  aimInOutDuration: 0.1
   shootType: 0
   firing: 0
   reloading: 0
-  shootPoint: {fileID: 8893484672268035095}
+  DamageCrosshair: {fileID: 7391342248865467244, guid: 9ba0143cf5f425545a4c53a62305145c, type: 3}
   shootFromCamera: 1
-  camShootPoint: {fileID: 0}
+  shootPoint: {fileID: 8893484672268035095}
+  hitReaction: Hit
+  HitLayers:
+    serializedVersion: 2
+    m_Bits: 1537
+  DamageTags:
+  - Enemy
+  - Companion
+  UseRigidbodyBullet: 0
   Bullet: {fileID: 8352329729915399606, guid: 4ba7e73409a52de4094cd4f4a8cff10a, type: 3}
-  ShootVolume: 0.5
-  fireSound: {fileID: 8300000, guid: 912c72b7fe6e1d34eb31691b2f2a1149, type: 3}
-  ReloadVolume: 0.35
-  reloadSound: {fileID: 8300000, guid: 7ec4f80dbb84a2a49a3ccad93242118b, type: 3}
+  bulletVelocity: 5000
+  bulletDespawnTime: 1
+  hitVolume: 0.35
+  hitForce: 5
+  hitSounds: []
   bulletsPerMag: 100
   bulletsInMag: 0
   CurrentAmmoTextMesh: {fileID: 2428132461286911790}
   MaxAmmoTextMesh: {fileID: 4906076310625129414}
   totalBullets: 999
+  reloadTime: 2
+  grenadeTime: 2
+  fireRate: 0.015
+  UseRecoil: 1
+  recoilAmount: 0.2
+  recoilDuration: 0.5
+  returnSpeed: 0.5
+  ShootVolume: 0.5
+  fireSound: {fileID: 8300000, guid: 912c72b7fe6e1d34eb31691b2f2a1149, type: 3}
+  ReloadVolume: 0.35
+  reloadSound: {fileID: 8300000, guid: 7ec4f80dbb84a2a49a3ccad93242118b, type: 3}
   muzzleFlashes:
   - {fileID: 8893484673999923664}
   - {fileID: 8893484672534944107}
@@ -815,21 +834,19 @@ MonoBehaviour:
   magDropPoint: {fileID: 8893484673987068437}
   Shell: {fileID: 5063786622371055068, guid: e08186e2e738c754baccb14dc81351cf, type: 3}
   Mag: {fileID: 1487331823463798197, guid: 9ca60f2de24247e41ac3dc260b10e5fd, type: 3}
-  bulletVelocity: 5000
-  bulletDespawnTime: 1
   shellVelocity: 150
   magVelocity: 15
   shellDespawnTime: 3
   magDespawnTime: 3
   cycleTimeBoltAction: 0
   cycleTimeSemiAuto: 0.1
-  reloadTime: 2
-  grenadeTime: 2
-  fireRate: 0.015
-  UseRecoil: 1
-  recoilAmount: 0.2
-  recoilDuration: 0.5
-  returnSpeed: 0.5
+  AutoDestroyImpacts: 1
+  impactParticles:
+  - {fileID: 947488135204848535, guid: be2c95819fdf9a042ac7bdf1f6604765, type: 3}
+  impactBloodParticles:
+  - {fileID: 2629315510494466023, guid: 08e1696e31d137247891000360fc76cb, type: 3}
+  - {fileID: 5057636687296104604, guid: cd5ac874bf846244da789a749dde2079, type: 3}
+  impactDespawnTime: 0.5
 --- !u!114 &8893484672054188677
 MonoBehaviour:
   m_ObjectHideFlags: 0

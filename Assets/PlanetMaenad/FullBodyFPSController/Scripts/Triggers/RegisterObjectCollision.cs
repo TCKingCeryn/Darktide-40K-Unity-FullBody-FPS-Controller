@@ -19,8 +19,7 @@ namespace PlanetMaenad.FPS
         private Vector3 previousPosition;
         private Rigidbody myRigidbody;
         private Collider myCollider;
-
-        //initialize values 
+        
         void Start()
         {
             myRigidbody = GetComponent<Rigidbody>();

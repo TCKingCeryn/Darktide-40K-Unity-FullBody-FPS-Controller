@@ -141,7 +141,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2164040, guid: 5302535af1044152a457ed104f1f4b91, type: 2}
+  - {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -185,8 +185,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: 000
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 5302535af1044152a457ed104f1f4b91, type: 2}
-  m_sharedMaterial: {fileID: 2164040, guid: 5302535af1044152a457ed104f1f4b91, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -517,7 +517,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 66171dea13b0f7c4c898c95940cc94c3, type: 2}
+  - {fileID: 2100000, guid: 047195549dc22f94e931a614fbb7e5ea, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -625,64 +625,57 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   PlayerController: {fileID: 0}
-  FPSController: {fileID: 0}
-  BodyAnimator: {fileID: 0}
-  ArmsAnimator: {fileID: 0}
+  PlayerArmsController: {fileID: 0}
+  WeaponAdjust: {fileID: 3725033023997019552}
   mainCam: {fileID: 0}
+  AttackButton: 323
+  AimButton: 324
   UseFPSArmsConstant: 1
   UseFPSArmsOnAttack: 1
   UseFPSArmsOnAim: 1
-  HUDController: {fileID: 0}
-  WeaponAdjust: {fileID: 3725033023997019552}
-  aimCamPosition: {x: 0.18545, y: -0.0585, z: -0.15}
-  aimCamOffset: {x: 0, y: 0, z: 0}
-  UseRandomAttack: 0
-  MinRandom: 0
-  MaxRandom: 0
   MoveSetID: 4
   Weapon: 0
   Damage: 300
   SecondaryObjects: []
   Hitboxes: []
+  UseRandomAttack: 0
+  MinRandom: 0
+  MaxRandom: 0
+  aimCamPosition: {x: 0.18545, y: -0.0585, z: -0.15}
+  aimCamOffset: {x: 0, y: 0, z: 0}
+  originalCamFov: 90
+  zoomInAmount: 20
+  aimTime: 5
+  aimInOutDuration: 0.1
   attacking: 0
   swapping: 0
   sprinting: 0
   aiming: 0
-  originalCamFov: 90
-  aimTime: 5
-  zoomInAmount: 20
-  aimInOutDuration: 0.1
   shootType: 2
   firing: 0
   reloading: 0
-  shootPoint: {fileID: 3725033024226906281}
+  DamageCrosshair: {fileID: 7391342248865467244, guid: 9ba0143cf5f425545a4c53a62305145c, type: 3}
   shootFromCamera: 1
-  camShootPoint: {fileID: 0}
+  shootPoint: {fileID: 3725033024226906281}
+  hitReaction: Hit
+  HitLayers:
+    serializedVersion: 2
+    m_Bits: 1537
+  DamageTags:
+  - Enemy
+  - Companion
+  UseRigidbodyBullet: 0
   Bullet: {fileID: 8352329729915399606, guid: 4ba7e73409a52de4094cd4f4a8cff10a, type: 3}
-  ShootVolume: 3
-  fireSound: {fileID: 8300000, guid: a1ec081b810a4b14faa2ccb5860e60d7, type: 3}
-  ReloadVolume: 0.5
-  reloadSound: {fileID: 8300000, guid: 7ec4f80dbb84a2a49a3ccad93242118b, type: 3}
+  bulletVelocity: 5000
+  bulletDespawnTime: 1
+  hitVolume: 0.35
+  hitForce: 5
+  hitSounds: []
   bulletsPerMag: 25
   bulletsInMag: 0
   CurrentAmmoTextMesh: {fileID: 7504101349190453571}
   MaxAmmoTextMesh: {fileID: 9101362258677921211}
   totalBullets: 999
-  muzzleFlashes:
-  - {fileID: 7364370969051165859}
-  - {fileID: 7364370969051165857}
-  ejectionPoint: {fileID: 3725033023563159302}
-  magDropPoint: {fileID: 3725033024196686658}
-  Shell: {fileID: 5063786622371055068, guid: e08186e2e738c754baccb14dc81351cf, type: 3}
-  Mag: {fileID: 664924883442905794, guid: c43027698b8721d4a879bf3167768a12, type: 3}
-  bulletVelocity: 5000
-  bulletDespawnTime: 1
-  shellVelocity: 150
-  magVelocity: 15
-  shellDespawnTime: 3
-  magDespawnTime: 3
-  cycleTimeBoltAction: 0.75
-  cycleTimeSemiAuto: 0
   reloadTime: 2.25
   grenadeTime: 2
   fireRate: 0.075
@@ -690,6 +683,30 @@ MonoBehaviour:
   recoilAmount: 0.2
   recoilDuration: 0.5
   returnSpeed: 0.5
+  ShootVolume: 3
+  fireSound: {fileID: 8300000, guid: a1ec081b810a4b14faa2ccb5860e60d7, type: 3}
+  ReloadVolume: 0.5
+  reloadSound: {fileID: 8300000, guid: 7ec4f80dbb84a2a49a3ccad93242118b, type: 3}
+  muzzleFlashes:
+  - {fileID: 7364370969051165859}
+  - {fileID: 7364370969051165857}
+  ejectionPoint: {fileID: 3725033023563159302}
+  magDropPoint: {fileID: 3725033024196686658}
+  Shell: {fileID: 5063786622371055068, guid: e08186e2e738c754baccb14dc81351cf, type: 3}
+  Mag: {fileID: 664924883442905794, guid: c43027698b8721d4a879bf3167768a12, type: 3}
+  shellVelocity: 150
+  magVelocity: 15
+  shellDespawnTime: 3
+  magDespawnTime: 3
+  cycleTimeBoltAction: 0.75
+  cycleTimeSemiAuto: 0
+  AutoDestroyImpacts: 1
+  impactParticles:
+  - {fileID: 947488135204848535, guid: be2c95819fdf9a042ac7bdf1f6604765, type: 3}
+  impactBloodParticles:
+  - {fileID: 2629315510494466023, guid: 08e1696e31d137247891000360fc76cb, type: 3}
+  - {fileID: 5057636687296104604, guid: cd5ac874bf846244da789a749dde2079, type: 3}
+  impactDespawnTime: 0.5
 --- !u!114 &3725033023997019552
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -726,7 +743,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7db4aa7a1af2871419f0d1e5873a5f2e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  camControl: {fileID: 0}
+  PlayerArmsController: {fileID: 0}
   sniperAimSensitivty: 0.7
   blackLensAnim: {fileID: 3725033024726551000}
 --- !u!82 &3725033023997019553
@@ -1081,7 +1098,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2164040, guid: 5302535af1044152a457ed104f1f4b91, type: 2}
+  - {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -1125,8 +1142,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: 00
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 5302535af1044152a457ed104f1f4b91, type: 2}
-  m_sharedMaterial: {fileID: 2164040, guid: 5302535af1044152a457ed104f1f4b91, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -6160,7 +6177,6 @@ ParticleSystemRenderer:
   m_RendererPriority: 0
   m_Materials:
   - {fileID: 2100000, guid: 86b250a0578090746840c6eda8a93c9b, type: 2}
-  - {fileID: 0}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

@@ -14,12 +14,11 @@ namespace PlanetMaenad.FPS
 
         public float MoveSetID = 1;
         public WeaponTypes Weapon;
+        public int Damage;
+        [Space(5)]
         public GameObject[] SecondaryObjects;
         public Collider[] Hitboxes;
         public bool attacking;
-        [Space(10)]
-
-        public int Damage;
 
 
         public enum WeaponTypes { Rifle, Pistol, Melee };
