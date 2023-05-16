@@ -27,7 +27,8 @@ namespace PlanetMaenad.FPS
         public UnityEvent OnReceiveDamage;
         [Space(10)]
 
-        public bool IgnoreReaction;
+        public bool IsBlocking;
+        [Space(5)]
         public bool playNoiseOnHurt;
         public float percentageToPlay;
         public AudioSource hurtSource;
@@ -63,11 +64,9 @@ namespace PlanetMaenad.FPS
         void Start()
         {
             if (!HUDController && !isAI) HUDController = GameObject.FindGameObjectWithTag("HUD").GetComponent<HealthUIController>();
-
             if (HUDController && HUDController.HealthMeshFill) meshRenderer = HUDController.HealthMeshFill;
 
             matBlock = new MaterialPropertyBlock();
-
 
             startingPos = transform.position;
 
@@ -121,84 +120,18 @@ namespace PlanetMaenad.FPS
             matBlock.SetFloat("_Fill", value);
 
             meshRenderer.SetPropertyBlock(matBlock);
+
+            if (HUDController && HUDController.HealthTextMesh) HUDController.HealthTextMesh.text = health.ToString();
         }
 
 
         public void Damage(Vector3 pos, float Force, float damage)
         {
-            OnReceiveDamage.Invoke();
-
-            if (playNoiseOnHurt)
+            if(!IsBlocking)
             {
-                if (hurtNoises.Length > 0)
-                {
-                    float random = Random.Range(0f, 1f);
+                OnReceiveDamage.Invoke();
 
-                    if (random <= 0.3f)
-                    {
-                        int randomIndex = Random.Range(0, hurtNoises.Length);
-
-                        if (hurtSource) hurtSource.clip = hurtNoises[randomIndex]; hurtSource.PlayOneShot(hurtNoises[randomIndex]);
-                    }
-                }
-            }
-            if (isAI)
-            {
-                if (isAI && GetComponent<AIController>())
-                {
-                    gameObject.GetComponent<AIController>().overrideAttack = true;
-                }
-            }
-
-            health -= damage;
-
-            //Death
-            if (health <= 0)
-            {
-                OnDeath.Invoke();
-
-                var PlayerHealthControl = GameObject.FindGameObjectWithTag("HUD").GetComponent<HealthUIController>();
-                PlayerHealthControl.CurrentKillCount += 1; PlayerHealthControl.UpdateKillHUD();
-
-                if (!tempdoll)
-                {
-                    tempdoll = Instantiate(ragdoll, this.transform.position, this.transform.rotation) as GameObject;
-                }
-
-                if (DestroyOnDead) Destroy(gameObject);
-
-                foreach (Rigidbody rb in tempdoll.GetComponentsInChildren<Rigidbody>())
-                {
-                    rb.AddForce(pos * 5f);
-                }
-            }
-
-            //Damage
-            if (health > 0)
-            {
-                if (CharacterAnimator && !IgnoreReaction) CharacterAnimator.Play("Hit");
-
-                if (regen)
-                {
-                    timeBeforeRegen = origTimeBeforeRegen;
-                    StopCoroutine("regenHealth");
-                    CancelInvoke();
-
-                    if (timeBeforeRegen == origTimeBeforeRegen)
-                    {
-                        alreadyRegenning = true;
-                        Invoke(nameof(regenEnumeratorStart), timeBeforeRegen);
-                    }
-                }
-            }           
-        }
-        public void DamageBig(Vector3 pos, float Force, float damage)
-        {
-            OnReceiveDamage.Invoke();
-
-            if (playNoiseOnHurt)
-            {
-                if (Random.value < percentageToPlay)
+                if (playNoiseOnHurt)
                 {
                     if (hurtNoises.Length > 0)
                     {
@@ -207,70 +140,136 @@ namespace PlanetMaenad.FPS
                         if (random <= 0.3f)
                         {
                             int randomIndex = Random.Range(0, hurtNoises.Length);
-                            if(hurtSource) hurtSource.PlayOneShot(hurtNoises[randomIndex]);
+
+                            if (hurtSource) hurtSource.clip = hurtNoises[randomIndex]; hurtSource.PlayOneShot(hurtNoises[randomIndex]);
                         }
                     }
                 }
-            }
-            if (isAI)
-            {
-                if (isAI && GetComponent<AIController>())
+                if (isAI)
                 {
-                    gameObject.GetComponent<AIController>().overrideAttack = true;
-                }
-            }
-
-            health -= damage;
-
-            //Death
-            if (health <= 0)
-            {
-                OnDeath.Invoke();
-
-                var PlayerHealthControl = GameObject.FindGameObjectWithTag("HUD").GetComponent<HealthUIController>();
-                PlayerHealthControl.CurrentKillCount += 1; PlayerHealthControl.UpdateKillHUD();
-
-                if (!tempdoll)
-                {
-                    tempdoll = Instantiate(ragdoll, this.transform.position, this.transform.rotation) as GameObject;
-                }
-
-                if (DestroyOnDead) Destroy(gameObject);
-
-                foreach (Rigidbody rb in tempdoll.GetComponentsInChildren<Rigidbody>())
-                {
-                    rb.AddForce(pos * 5f);
-                }
-            }
-
-            //Damage
-            if (health > 0)
-            {
-                if (CharacterAnimator && !IgnoreReaction) CharacterAnimator.Play("HitBig");
-
-                if (regen)
-                {
-                    timeBeforeRegen = origTimeBeforeRegen;
-                    StopCoroutine("regenHealth");
-                    CancelInvoke();
-
-                    if (timeBeforeRegen == origTimeBeforeRegen)
+                    if (isAI && GetComponent<AIController>())
                     {
-                        alreadyRegenning = true;
-                        Invoke(nameof(regenEnumeratorStart), timeBeforeRegen);
+                        gameObject.GetComponent<AIController>().overrideAttack = true;
                     }
                 }
-            }
+
+                health -= damage;
+
+                //Death
+                if (health <= 0)
+                {
+                    OnDeath.Invoke();
+
+                    if (!tempdoll)
+                    {
+                        tempdoll = Instantiate(ragdoll, this.transform.position, this.transform.rotation) as GameObject;
+                    }
+
+                    if (DestroyOnDead) Destroy(gameObject);
+
+                    foreach (Rigidbody rb in tempdoll.GetComponentsInChildren<Rigidbody>())
+                    {
+                        rb.AddForce(pos * 5f);
+                    }
+                }
+
+                //Damage
+                if (health > 0)
+                {
+                    //if (CharacterAnimator && !IgnoreReaction) CharacterAnimator.Play("Hit");
+
+                    if (regen)
+                    {
+                        timeBeforeRegen = origTimeBeforeRegen;
+                        StopCoroutine("regenHealth");
+                        CancelInvoke();
+
+                        if (timeBeforeRegen == origTimeBeforeRegen)
+                        {
+                            alreadyRegenning = true;
+                            Invoke(nameof(regenEnumeratorStart), timeBeforeRegen);
+                        }
+                    }
+                }
+            }          
         }
+        public void DamageBig(Vector3 pos, float Force, float damage)
+        {
+            if (!IsBlocking)
+            {
+                OnReceiveDamage.Invoke();
+
+                if (playNoiseOnHurt)
+                {
+                    if (Random.value < percentageToPlay)
+                    {
+                        if (hurtNoises.Length > 0)
+                        {
+                            float random = Random.Range(0f, 1f);
+
+                            if (random <= 0.3f)
+                            {
+                                int randomIndex = Random.Range(0, hurtNoises.Length);
+                                if (hurtSource) hurtSource.PlayOneShot(hurtNoises[randomIndex]);
+                            }
+                        }
+                    }
+                }
+                if (isAI)
+                {
+                    if (isAI && GetComponent<AIController>())
+                    {
+                        gameObject.GetComponent<AIController>().overrideAttack = true;
+                    }
+                }
+
+                health -= damage;
+
+                //Death
+                if (health <= 0)
+                {
+                    OnDeath.Invoke();
+
+                    if (!tempdoll)
+                    {
+                        tempdoll = Instantiate(ragdoll, this.transform.position, this.transform.rotation) as GameObject;
+                    }
+
+                    if (DestroyOnDead) Destroy(gameObject);
+
+                    foreach (Rigidbody rb in tempdoll.GetComponentsInChildren<Rigidbody>())
+                    {
+                        rb.AddForce(pos * 5f);
+                    }
+                }
+
+                //Damage
+                if (health > 0)
+                {
+                    //if (CharacterAnimator && !IgnoreReaction) CharacterAnimator.Play("HitBig");
+
+                    if (regen)
+                    {
+                        timeBeforeRegen = origTimeBeforeRegen;
+                        StopCoroutine("regenHealth");
+                        CancelInvoke();
+
+                        if (timeBeforeRegen == origTimeBeforeRegen)
+                        {
+                            alreadyRegenning = true;
+                            Invoke(nameof(regenEnumeratorStart), timeBeforeRegen);
+                        }
+                    }
+                }
+            }           
+        }
+
 
         public void Die()
         {
             isDead = true;
 
             OnDeath.Invoke();
-
-            var PlayerHealthControl = GameObject.FindGameObjectWithTag("HUD").GetComponent<HealthUIController>();
-            PlayerHealthControl.CurrentKillCount += 1; PlayerHealthControl.UpdateKillHUD();
 
             if (RespawnOnDead) StartCoroutine(RespawnDelay());
 
@@ -281,9 +280,6 @@ namespace PlanetMaenad.FPS
                 {
                     //Spawn ragdoll and destroy us
                     tempdoll = Instantiate(ragdoll, this.transform.position, this.transform.rotation) as GameObject;
-
-                    //Tell the ragdoll if we are a player or not so it knows to move our camera or not to the ragdoll
-                    //tempdoll.GetComponent<OverrideCameraParent>().isAi = isAI;
                 }
 
                 if (DestroyOnDead) Destroy(gameObject);
@@ -323,11 +319,6 @@ namespace PlanetMaenad.FPS
         }
         IEnumerator RespawnDelay()
         {
-            var PlayerHealthControl = GameObject.FindGameObjectWithTag("HUD").GetComponent<HealthUIController>();
-
-            if (!isAI && PlayerHealthControl && PlayerHealthControl.CurrentKillCount > PlayerHealthControl.PreviousHighScore) PlayerHealthControl.PreviousHighScore = PlayerHealthControl.CurrentKillCount;
-            if (!isAI && PlayerHealthControl) PlayerHealthControl.CurrentKillCount = 0; PlayerHealthControl.UpdateKillHUD();
-
             yield return new WaitForSeconds(respawnTime);
 
             transform.position = startingPos;

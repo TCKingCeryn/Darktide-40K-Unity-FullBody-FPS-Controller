@@ -110,23 +110,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 68b9f081fd1c45a4c9cfd388b7d74501, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  IsPlayer: 1
   PlayerController: {fileID: 0}
+  PlayerDamageCrosshair: {fileID: 7391342248865467244, guid: 9ba0143cf5f425545a4c53a62305145c, type: 3}
   RootCharacter: {fileID: 0}
   ForceForwardTransform: {fileID: 0}
   Trigger: {fileID: 8800650809178390390}
-  DamageCrosshair: {fileID: 7391342248865467244, guid: 9ba0143cf5f425545a4c53a62305145c,
-    type: 3}
+  hitReaction: Hit
   HitLayers:
     serializedVersion: 2
     m_Bits: 5633
   DamageTags:
   - Enemy
   - Companion
-  IsBigHit: 0
   Damage: 75
-  DamageFrequencyTimer: 2
+  hitforce: 5
   hitVolume: 0.35
-  hitforce: 15
   hitSounds:
   - {fileID: 8300000, guid: 120f03dda7f144249afd526577f41d56, type: 3}
   - {fileID: 8300000, guid: 839c6083bf6b97f479c9536cbabe097c, type: 3}
@@ -134,10 +133,16 @@ MonoBehaviour:
   - {fileID: 8300000, guid: d7575ecd04b156441a05f11c94d5eeba, type: 3}
   - {fileID: 8300000, guid: 5364890b843136c49af2d33fc65d926b, type: 3}
   - {fileID: 8300000, guid: 38a335ce586d2234db23b12ac2d8e630, type: 3}
-  impactParticle: {fileID: 947488135204848535, guid: be2c95819fdf9a042ac7bdf1f6604765,
-    type: 3}
-  impactBloodParticle: {fileID: 2629315510494466023, guid: 08e1696e31d137247891000360fc76cb,
-    type: 3}
+  damageSounds:
+  - {fileID: 8300000, guid: d7575ecd04b156441a05f11c94d5eeba, type: 3}
+  - {fileID: 8300000, guid: 5364890b843136c49af2d33fc65d926b, type: 3}
+  - {fileID: 8300000, guid: 38a335ce586d2234db23b12ac2d8e630, type: 3}
+  IsBigHit: 0
+  impactParticles:
+  - {fileID: 947488135204848535, guid: be2c95819fdf9a042ac7bdf1f6604765, type: 3}
+  impactBloodParticles:
+  - {fileID: 2629315510494466023, guid: 08e1696e31d137247891000360fc76cb, type: 3}
+  - {fileID: 5057636687296104604, guid: cd5ac874bf846244da789a749dde2079, type: 3}
   impactDespawnTime: 5
 --- !u!1 &2246389311864219820
 GameObject:
@@ -501,31 +506,30 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   PlayerController: {fileID: 0}
-  FPSController: {fileID: 0}
-  BodyAnimator: {fileID: 0}
-  ArmsAnimator: {fileID: 0}
+  PlayerArmsController: {fileID: 0}
+  WeaponAdjust: {fileID: 0}
   mainCam: {fileID: 0}
+  AttackButton: 323
+  AimButton: 324
   UseFPSArmsConstant: 1
   UseFPSArmsOnAttack: 1
   UseFPSArmsOnAim: 1
-  HUDController: {fileID: 0}
-  WeaponAdjust: {fileID: 0}
-  aimCamPosition: {x: 0, y: 0, z: 0}
-  aimCamOffset: {x: 0, y: 0, z: 0}
-  UseRandomAttack: 1
-  MinRandom: -1
-  MaxRandom: 5
   MoveSetID: 1
   Weapon: 2
   Damage: 75
   SecondaryObjects: []
   Hitboxes:
   - {fileID: 2271635497906538894}
+  UseRandomAttack: 1
+  MinRandom: -1
+  MaxRandom: 5
+  aimCamPosition: {x: 0, y: 0, z: 0}
+  aimCamOffset: {x: 0, y: 0, z: 0}
+  originalCamFov: 90
+  zoomInAmount: 50
+  aimTime: 5
+  aimInOutDuration: 0.1
   attacking: 0
   swapping: 0
   sprinting: 0
   aiming: 0
-  originalCamFov: 90
-  aimTime: 5
-  zoomInAmount: 50
-  aimInOutDuration: 0.1

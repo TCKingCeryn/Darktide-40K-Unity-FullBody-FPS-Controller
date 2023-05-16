@@ -57,23 +57,39 @@ MonoBehaviour:
   WeaponAdjust: {fileID: 1986004486008236516}
   MoveSetID: 1
   Weapon: 0
+  Damage: 15
   SecondaryObjects: []
   Hitboxes: []
   attacking: 0
-  Damage: 15
   shootType: 0
   reloading: 0
   firing: 0
   aiming: 0
   shootPoint: {fileID: 0}
+  HitLayers:
+    serializedVersion: 2
+    m_Bits: 1793
+  DamageTags:
+  - Player
+  - Companion
+  - Enemy
+  UseRigidbodyBullet: 0
   Bullet: {fileID: 8352329729915399606, guid: 2ad51c18bf71a904495a639c935958bf, type: 3}
+  bulletVelocity: 5000
+  bulletDespawnTime: 1
+  hitVolume: 0.35
+  hitForce: 5
+  hitSounds: []
+  bulletsPerMag: 25
+  bulletsInMag: 0
+  totalBullets: 9999
+  reloadTime: 1.5
+  grenadeTime: 2
+  fireRate: 0.1
   ShootVolume: 0.35
   fireSound: {fileID: 8300000, guid: 5571b3c01b3236a44bf0d5d728cb5fa9, type: 3}
   ReloadVolume: 0.35
   reloadSound: {fileID: 8300000, guid: 7ec4f80dbb84a2a49a3ccad93242118b, type: 3}
-  bulletsPerMag: 25
-  bulletsInMag: 0
-  totalBullets: 9999
   muzzleFlashes:
   - {fileID: 3006543617399535825}
   - {fileID: 4032462974375249569}
@@ -82,17 +98,18 @@ MonoBehaviour:
   magDropPoint: {fileID: 7954689828608170559}
   Shell: {fileID: 5063786622371055068, guid: e08186e2e738c754baccb14dc81351cf, type: 3}
   Mag: {fileID: 664924883442905794, guid: c43027698b8721d4a879bf3167768a12, type: 3}
-  bulletVelocity: 5000
-  bulletDespawnTime: 1
   shellVelocity: 50
   magVelocity: 15
   shellDespawnTime: 2
   magDespawnTime: 3
   cycleTimeBoltAction: 0
   cycleTimeSemiAuto: 0.3
-  reloadTime: 1.5
-  grenadeTime: 2
-  fireRate: 0.1
+  AutoDestroyImpacts: 1
+  impactParticles:
+  - {fileID: 947488135204848535, guid: be2c95819fdf9a042ac7bdf1f6604765, type: 3}
+  impactBloodParticles:
+  - {fileID: 2629315510494466023, guid: 08e1696e31d137247891000360fc76cb, type: 3}
+  impactDespawnTime: 0.5
 --- !u!114 &1986004486008236516
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -110,7 +127,7 @@ MonoBehaviour:
   Weapon: {fileID: 0}
   useHead: 0
   headBone: {fileID: 0}
-  headOffsetRot: {x: 0, y: 0, z: 0}
+  headOffsetRot: {x: 0, y: -45, z: 0}
   useLeftHand: 0
   leftHandBone: {fileID: 0}
   leftIKTarget: {fileID: 0}

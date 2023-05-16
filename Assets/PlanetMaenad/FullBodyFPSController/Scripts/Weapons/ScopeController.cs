@@ -7,7 +7,7 @@ namespace PlanetMaenad.FPS
 {
     public class ScopeController : MonoBehaviour
     {
-        public FPSCameraController camControl;
+        public FPSArmsController PlayerArmsController;
         public float sniperAimSensitivty;
         public Animator blackLensAnim;
 
@@ -17,7 +17,7 @@ namespace PlanetMaenad.FPS
 
         void Start()
         {
-            originalCamSensitivity = camControl.Sensitivity;
+            originalCamSensitivity = PlayerArmsController.Sensitivity;
         }
 
 

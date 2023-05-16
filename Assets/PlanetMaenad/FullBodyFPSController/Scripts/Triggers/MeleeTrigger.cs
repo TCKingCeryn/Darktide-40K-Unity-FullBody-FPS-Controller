@@ -6,197 +6,144 @@ namespace PlanetMaenad.FPS
 {
     public class MeleeTrigger : MonoBehaviour
     {
-        public FPSPlayerController PlayerController;
+        public bool IsPlayer;
+        public DEMOExamplePlayer PlayerController;
+        public GameObject PlayerDamageCrosshair;
+        [Space(10)]
+
+
         public GameObject RootCharacter;
         public GameObject ForceForwardTransform;
         public Collider Trigger;
         [Space(10)]
 
-        public GameObject DamageCrosshair;
-        [Space(5)]
+        public string hitReaction = "Hit";
         public LayerMask HitLayers = -1;
         public string[] DamageTags;
+        [Space(5)]
+        public int Damage;
+        public float hitforce;
+        public float hitVolume = .35f;
+        public AudioClip[] hitSounds;
+        public AudioClip[] damageSounds;
         [Space(10)]
-
-
 
         public bool IsBigHit;
-        public int Damage;
-        public float DamageFrequencyTimer = 2f;
-        [Space(5)]
-        public float hitVolume = .35f;
-        public float hitforce;
-        public AudioClip[] hitSounds;
-        [Space(10)]
-
-
-
-        public GameObject impactParticle;
-        public GameObject impactBloodParticle;
+        public GameObject[] impactParticles;
+        public GameObject[] impactBloodParticles;
         public float impactDespawnTime = 3f;
 
+
+
         internal WaitForSeconds DamageFrequency;
-        internal bool CanApplyDamage;
+        internal bool CanApplyDamage = true;
         internal GameObject CurrentObject;
 
 
         void Start()
         {
-            DamageFrequency = new WaitForSeconds(DamageFrequencyTimer);
+
         }
 
         void OnTriggerEnter(Collider other)
         {
-            if(RootCharacter && other.gameObject != RootCharacter)
+            if ((HitLayers.value & 1 << other.gameObject.layer) == 1 << other.gameObject.layer)
             {
-                if ((HitLayers.value & 1 << other.gameObject.layer) == 1 << other.gameObject.layer)
+                CurrentObject = other.gameObject;
+                //Debug.Log("Hit Object: " + CurrentObject.gameObject.name);
+
+
+                //Check Tags
+                if (DamageTags.Length > 0)
                 {
-                    //Check Tags
-                    if (DamageTags.Length > 0)
+                    for (int i = 0; i < DamageTags.Length; i++)
                     {
-                        for (int i = 0; i < DamageTags.Length; i++)
+                        if (other.transform.CompareTag(DamageTags[i]))
                         {
-                            if (other.transform.CompareTag(DamageTags[i]))
-                            {
-                                PassDamage(CurrentObject);
-                            }
+                            PassDamage(CurrentObject, transform.position);
                         }
                     }
+                }
 
+                if (hitSounds.Length > 0)
+                {
+                    float random = Random.Range(0f, 1f);
 
-                    if (hitSounds.Length > 0)
+                    if (random <= 0.3f)
                     {
-                        float random = Random.Range(0f, 1f);
-
-                        if (random <= 0.3f)
-                        {
-                            int randomIndex = Random.Range(0, hitSounds.Length);
-                            AudioSource.PlayClipAtPoint(hitSounds[randomIndex], transform.position, hitVolume);
-                        }
+                        int randomIndex = Random.Range(0, hitSounds.Length);
+                        AudioSource.PlayClipAtPoint(hitSounds[randomIndex], transform.position, hitVolume);
                     }
+                }
 
 
+                for (int i = 0; i < impactParticles.Length; i++)
+                {
                     GameObject tempImpact;
-                    tempImpact = Instantiate(impactParticle, this.transform.position, this.transform.rotation) as GameObject;
+                    tempImpact = Instantiate(impactParticles[i], this.transform.position, this.transform.rotation) as GameObject;
                     tempImpact.transform.Rotate(Vector3.left * 90);
 
                     Destroy(tempImpact, impactDespawnTime);
 
-                    if (other.GetComponent<Rigidbody>() && ForceForwardTransform)
+                    if (other.GetComponent<Rigidbody>() && IsPlayer && ForceForwardTransform)
                     {
                         other.GetComponent<Rigidbody>().AddForce(ForceForwardTransform.transform.forward * 360 * hitforce);
                     }
                 }
-            }        
-        }
-
-
-        void OnTriggerStay(Collider other)
-        {
-            if (RootCharacter && other.gameObject != RootCharacter)
-            {
-                if ((HitLayers.value & 1 << other.gameObject.layer) == 1 << other.gameObject.layer)
-                {
-                    //Check Tags
-                    if (DamageTags.Length > 0)
-                    {
-                        for (int i = 0; i < DamageTags.Length; i++)
-                        {
-                            if (other.transform.CompareTag(DamageTags[i]))
-                            {
-                                CurrentObject = other.gameObject;
-
-                                if (CanApplyDamage)
-                                {
-                                  
-                                    CanApplyDamage = false;
-                                    ResetDamageDelay();                 
-                                }
-                            }
-                        }
-                    }
-
-                }
+                
             }
         }
+       
+        
 
 
-        void OnTriggerExit(Collider other)
+        public void PassDamage(GameObject other, Vector3 damagePoint)
         {
-            if (RootCharacter && other.gameObject != RootCharacter)
-            {
-                if ((HitLayers.value & 1 << other.gameObject.layer) == 1 << other.gameObject.layer)
-                {
-                    //Check Tags
-                    if (DamageTags.Length > 0)
-                    {
-                        for (int i = 0; i < DamageTags.Length; i++)
-                        {
-                            if (other.transform.CompareTag(DamageTags[i]))
-                            {
-                                CanApplyDamage = true;
-                                StopAllCoroutines();
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-
-
-        IEnumerator ResetDamageDelay()
-        {
-            while (enabled)
-            {
-                yield return DamageFrequency;
-
-                CanApplyDamage = true;
-            }
-        }
-
-        public void PassDamage(GameObject other)
-        {
-
             if (other != null)
             {
-                if (other.GetComponent<HealthController>())
-                {
-                    var rootHealth = other.GetComponent<HealthController>();
-                    if (DamageCrosshair && PlayerController) Instantiate(DamageCrosshair, PlayerController.healthControl.HUDController.DamageCrosshairParent.position, DamageCrosshair.transform.rotation, PlayerController.healthControl.HUDController.DamageCrosshairParent);
-
-                    if (!IsBigHit && ForceForwardTransform) rootHealth.Damage(ForceForwardTransform.transform.forward * 360, hitforce, Damage);
-                    if (IsBigHit && ForceForwardTransform) rootHealth.DamageBig(ForceForwardTransform.transform.forward * 360, hitforce, Damage);
-
-                    GameObject tempblood;
-                    tempblood = Instantiate(impactBloodParticle, this.transform.position, this.transform.rotation) as GameObject;
-                    tempblood.transform.Rotate(Vector3.left * 90);
-
-                    Destroy(tempblood, impactDespawnTime);
-                }
                 if (other.GetComponentInParent<HealthController>())
                 {
                     var parentHealth = other.GetComponentInParent<HealthController>();
-                    if (DamageCrosshair && PlayerController) Instantiate(DamageCrosshair, PlayerController.healthControl.HUDController.DamageCrosshairParent.position, DamageCrosshair.transform.rotation, PlayerController.healthControl.HUDController.DamageCrosshairParent);
+                    if (parentHealth.gameObject != RootCharacter.gameObject)
+                    {
+                        if (IsPlayer)
+                        {
+                            if (PlayerDamageCrosshair && PlayerController)
+                            {
+                                Instantiate(PlayerDamageCrosshair, PlayerController.DamageCrosshairHolder.position, PlayerDamageCrosshair.transform.rotation, PlayerController.DamageCrosshairHolder);
+                            }
+                        }
 
-                    if (!IsBigHit && ForceForwardTransform) parentHealth.Damage(ForceForwardTransform.transform.forward * 360, hitforce, Damage);
-                    if (IsBigHit && ForceForwardTransform) parentHealth.DamageBig(ForceForwardTransform.transform.forward * 360, hitforce, Damage);
+                        if (parentHealth.CharacterAnimator && hitReaction != null && !parentHealth.CharacterAnimator.GetCurrentAnimatorStateInfo(0).IsName(hitReaction)) parentHealth.CharacterAnimator.Play(hitReaction);
 
-                    GameObject tempblood;
-                    tempblood = Instantiate(impactBloodParticle, this.transform.position, this.transform.rotation) as GameObject;
-                    tempblood.transform.Rotate(Vector3.left * 90);
-
-                    Destroy(tempblood, impactDespawnTime);
-                }
+                        if (!IsBigHit && ForceForwardTransform) parentHealth.Damage(ForceForwardTransform.transform.forward * 360, hitforce, Damage);
+                        if (IsBigHit && ForceForwardTransform) parentHealth.DamageBig(ForceForwardTransform.transform.forward * 360, hitforce, Damage);
 
 
-            }
+                        for (int i = 0; i < impactBloodParticles.Length; i++)
+                        {
+                            GameObject tempblood;
+                            tempblood = Instantiate(impactBloodParticles[i], damagePoint, impactBloodParticles[i].transform.rotation) as GameObject;
+                            tempblood.transform.Rotate(Vector3.left * 90);
 
-            
+                            Destroy(tempblood, impactDespawnTime);
+                        }
+
+
+                        if (damageSounds.Length > 0)
+                        {
+                            float random = Random.Range(0f, 1f);
+
+                            if (random <= 0.3f)
+                            {
+                                int randomIndex = Random.Range(0, damageSounds.Length);
+                                AudioSource.PlayClipAtPoint(damageSounds[randomIndex], transform.position, hitVolume);
+                            }
+                        }
+
+                    }                    
+                }              
+            }       
         }
-
-
-
-
     }
 }

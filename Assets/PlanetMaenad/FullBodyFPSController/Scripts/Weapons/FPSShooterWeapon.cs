@@ -15,21 +15,53 @@ namespace PlanetMaenad.FPS
         [Space(10)]
 
 
-        public GameObject shootPoint;
+        public GameObject DamageCrosshair;
+        [Space(10)]
+
+
+
         public bool shootFromCamera;
-        public GameObject camShootPoint;
         [Space(5)]
+        public GameObject shootPoint;
+        public string hitReaction = "Hit";
+        public LayerMask HitLayers = -1;
+        public string[] DamageTags;
+        [Space(5)]
+        public bool UseRigidbodyBullet;
         public GameObject Bullet;
-        public float ShootVolume = .35f;
-        public AudioClip fireSound;
-        public float ReloadVolume = 0.35f;
-        public AudioClip reloadSound;
-        [Space(5)]
+        public float bulletVelocity;
+        public float bulletDespawnTime;
+        [Space(10)]
+
+        public float hitVolume = .35f;
+        public float hitForce = 5f;
+        public AudioClip[] hitSounds;
+        [Space(10)]
+
+
         public int bulletsPerMag;
         public int bulletsInMag;
         public TextMeshPro CurrentAmmoTextMesh;
         public TextMeshPro MaxAmmoTextMesh;
         public int totalBullets;
+        [Space(5)]
+        public float reloadTime = 0.2f;
+        public float grenadeTime;
+        public float fireRate = 0.1f;
+        [Space(10)]
+
+
+        public bool UseRecoil;
+        public float recoilAmount = .2f;
+        public float recoilDuration = .5f;
+        public float returnSpeed = .5f;
+        [Space(10)]
+
+
+        public float ShootVolume = .35f;
+        public AudioClip fireSound;
+        public float ReloadVolume = 0.35f;
+        public AudioClip reloadSound;
         [Space(10)]
 
 
@@ -41,32 +73,20 @@ namespace PlanetMaenad.FPS
         [Space(10)]
 
 
-
-        public float bulletVelocity;
-        public float bulletDespawnTime;
-        [Space(5)]
         public float shellVelocity;
         public float magVelocity;
-        [Space(5)]
         public float shellDespawnTime;
         public float magDespawnTime;
-        [Space(5)]
         public float cycleTimeBoltAction;
         public float cycleTimeSemiAuto;
         [Space(10)]
 
 
 
-
-        [Header("Timing")]
-        public float reloadTime =0.2f;
-        public float grenadeTime;
-        public float fireRate = 0.1f;
-        [Space(5)]
-        public bool UseRecoil;
-        public float recoilAmount = .2f;
-        public float recoilDuration = .5f;
-        public float returnSpeed = .5f;
+        public bool AutoDestroyImpacts;
+        public GameObject[] impactParticles;
+        public GameObject[] impactBloodParticles;
+        public float impactDespawnTime = 3f;
         [Space(10)]
 
 
@@ -74,11 +94,8 @@ namespace PlanetMaenad.FPS
 
         internal Vector3 originalPosition;
         internal Quaternion originalRotation;
-
-
         internal bool isRecoiling;
         internal float recoilTimer;
-
         internal bool recoilAuto = false;
         internal bool recoilSemi = false;
         internal bool throwing = false;
@@ -90,6 +107,7 @@ namespace PlanetMaenad.FPS
 
         public enum ShootTypes { SemiAuto, FullAuto, BoltAction };
 
+
         void OnEnable()
         {
             //Reset adjuster to sync up every time gun is loaded
@@ -98,11 +116,11 @@ namespace PlanetMaenad.FPS
 
             if (UseFPSArmsConstant)
             {
-                FPSController.LockFullbodyArms = true;
+                PlayerArmsController.LockFullbodyArms = true;
             }
             if (!UseFPSArmsConstant)
             {
-                FPSController.LockFullbodyArms = false;
+                PlayerArmsController.LockFullbodyArms = false;
             }
 
             originalPosition = transform.localPosition;
@@ -110,8 +128,6 @@ namespace PlanetMaenad.FPS
         }
         void Start()
         {
-            if (!HUDController) HUDController = GameObject.FindGameObjectWithTag("HUD").GetComponent<HealthUIController>();
-
             originalCamPos = new Vector3(0, .35f, 0.15f);
 
             //Set the ammo count
@@ -121,11 +137,11 @@ namespace PlanetMaenad.FPS
         void Update()
         {
             //Shoot
-            if (Input.GetKeyDown(KeyCode.Mouse0) && !firing && reloading == false && bulletsInMag > 0 && !cycling && !swapping)
+            if (Input.GetKeyDown(AttackButton) && !PlayerController.IsBlocking && !firing && reloading == false && bulletsInMag > 0 && !cycling && !swapping)
             {
                 if (UseFPSArmsOnAttack && !UseFPSArmsConstant)
                 {
-                    FPSController.LockFullbodyArms = true;
+                    PlayerArmsController.LockFullbodyArms = true;
                 }
 
                 firing = true;
@@ -181,11 +197,11 @@ namespace PlanetMaenad.FPS
                     }
                 }
             }
-            else if (firing && (Input.GetKeyUp(KeyCode.Mouse0) || bulletsInMag == 0))
+            else if (firing && (Input.GetKeyUp(AttackButton) || bulletsInMag == 0))
             {
                 if (UseFPSArmsOnAttack && !UseFPSArmsConstant)
                 {
-                    FPSController.LockFullbodyArms = false;
+                    PlayerArmsController.LockFullbodyArms = false;
                 }
 
                 firing = false;
@@ -199,7 +215,7 @@ namespace PlanetMaenad.FPS
             }
 
             //Sprint
-            if (Input.GetKey(KeyCode.LeftShift) && !aiming)
+            if (Input.GetKey(KeyCode.LeftShift) && !PlayerController.IsBlocking && !aiming)
             {
                 sprinting = true;
             }
@@ -209,10 +225,10 @@ namespace PlanetMaenad.FPS
             }
 
             //Reload
-            if (Input.GetKeyDown(KeyCode.R) && !reloading && !firing && bulletsInMag < bulletsPerMag && totalBullets > 0)
+            if (Input.GetKeyDown(KeyCode.R) && !PlayerController.IsBlocking && !reloading && !firing && bulletsInMag < bulletsPerMag && totalBullets > 0)
             {
-                ArmsAnimator.CrossFade("Reload", 0.1f);
-                BodyAnimator.SetBool("Reload", true);
+                PlayerController.ArmsAnimator.CrossFade("Reload", 0.1f);
+                PlayerController.BodyAnimator.SetBool("Reload", true);
 
                 reloading = true;
                 gameObject.GetComponent<AudioSource>().PlayOneShot(reloadSound, ReloadVolume);
@@ -222,23 +238,14 @@ namespace PlanetMaenad.FPS
             }
 
             //UI
-            //if (HUDController) HUDController.uiBullets.text = bulletsInMag.ToString() + "/" + totalBullets;
             if (CurrentAmmoTextMesh) CurrentAmmoTextMesh.text = bulletsInMag.ToString();
             if (MaxAmmoTextMesh) MaxAmmoTextMesh.text = totalBullets.ToString();
 
-            //Recoil
-            //if (isRecoiling)
-            //{
-
-            //}
-
 
             //Animators
-            ArmsAnimator.SetBool("Shoot", firing);
-            ArmsAnimator.SetBool("Sprint", sprinting);
+            PlayerController.ArmsAnimator.SetBool("Shoot", firing);
+            PlayerController.ArmsAnimator.SetBool("Sprint", sprinting);
         }
-
-
 
         IEnumerator ShootBulletDelay()
         {
@@ -261,36 +268,86 @@ namespace PlanetMaenad.FPS
         }
         void ShootBullet()
         {
-
-            GameObject tempBullet;
-
-            if (shootFromCamera)
+            if (!UseRigidbodyBullet)
             {
-                //Spawn bullet from the camera shoot point position, not from the true tip of the gun
-                tempBullet = Instantiate(Bullet, camShootPoint.transform.position, camShootPoint.transform.rotation) as GameObject;
-                tempBullet.GetComponent<RegisterDamageHit>().damage = Damage;
+                RaycastHit hit;
+                var rayDirection = shootFromCamera ? mainCam.transform.forward : shootPoint.transform.forward;
+
+                //Hits an Object
+                if (Physics.Raycast(shootFromCamera ? mainCam.transform.position : shootPoint.transform.position, rayDirection, out hit, 1000 + 1, HitLayers))
+                {
+                    var hitTransform = hit.collider.transform;
+                    //Debug.Log("Hit Object: " + hitTransform.gameObject.name);
+
+                    for (int i = 0; i < DamageTags.Length; i++)
+                    {
+                        //Can See Target
+                        if (hitTransform.CompareTag(DamageTags[i]))
+                        {
+                            PassDamage(hitTransform.gameObject, hit.point);
+                        }
+                    }
+
+
+                    if (hitSounds.Length > 0)
+                    {
+                        float random = Random.Range(0f, 1f);
+
+                        if (random <= 0.3f)
+                        {
+                            int randomIndex = Random.Range(0, hitSounds.Length);
+                            AudioSource.PlayClipAtPoint(hitSounds[randomIndex], transform.position, hitVolume);
+                        }
+                    }
+
+                    for (int i = 0; i < impactParticles.Length; i++)
+                    {
+                        GameObject tempImpact;
+                        tempImpact = Instantiate(impactParticles[i], hit.point, impactParticles[i].transform.rotation) as GameObject;
+                        tempImpact.transform.Rotate(Vector3.left * 90);
+
+                        Destroy(tempImpact, impactDespawnTime);
+
+                        if (hitTransform.GetComponent<Rigidbody>())
+                        {
+                            hitTransform.GetComponent<Rigidbody>().AddForce(mainCam.transform.forward * 1 * hitForce);
+                        }
+                    }
+                   
+                }
             }
-            else
+
+            if (UseRigidbodyBullet && Bullet)
             {
-                //Spawn bullet from the shoot point position, the true tip of the gun
-                tempBullet = Instantiate(Bullet, shootPoint.transform.position, shootPoint.transform.rotation) as GameObject;
-                tempBullet.GetComponent<RegisterDamageHit>().damage = Damage;
-            }
+                GameObject tempBullet;
+                if (shootFromCamera)
+                {
 
-            if (PlayerController) tempBullet.GetComponent<RegisterDamageHit>().PlayerController = PlayerController;
+                    tempBullet = Instantiate(Bullet, mainCam.transform.position, mainCam.transform.rotation) as GameObject;
+                    tempBullet.GetComponent<RegisterDamageHit>().Damage = Damage;
+                }
+                else
+                {
+                    //Spawn bullet from the shoot point position, the true tip of the gun
+                    tempBullet = Instantiate(Bullet, shootPoint.transform.position, shootPoint.transform.rotation) as GameObject;
+                    tempBullet.GetComponent<RegisterDamageHit>().Damage = Damage;
+                }
 
-            //Orient it
-            tempBullet.transform.Rotate(Vector3.left * 90);
+                if (PlayerController) tempBullet.GetComponent<RegisterDamageHit>().PlayerController = PlayerController;
 
-            //Add forward force based on where camera is pointing
-            Rigidbody tempRigidBody;
-            tempRigidBody = tempBullet.GetComponent<Rigidbody>();
+                //Orient it
+                tempBullet.transform.Rotate(Vector3.left * 90);
 
-            //Always shoot towards where camera is facing
-            tempRigidBody.AddForce(mainCam.transform.forward * bulletVelocity);
+                //Add forward force based on where camera is pointing
+                Rigidbody tempRigidBody;
+                tempRigidBody = tempBullet.GetComponent<Rigidbody>();
 
-            //Destroy after time
-            Destroy(tempBullet, bulletDespawnTime);
+                //Always shoot towards where camera is facing
+                tempRigidBody.AddForce(mainCam.transform.forward * bulletVelocity);
+
+                //Destroy after time
+                Destroy(tempBullet, bulletDespawnTime);
+            }          
         }
         void SpawnShell()
         {
@@ -328,19 +385,32 @@ namespace PlanetMaenad.FPS
         }
 
 
-        //IEnumerator ResetRecoilDelay()
-        //{
-        //    yield return new WaitForSeconds(recoilDuration);
+        public void PassDamage(GameObject other, Vector3 damagePoint)
+        {
+            if (other.GetComponentInParent<HealthController>())
+            {
+                var parentHealth = other.GetComponentInParent<HealthController>();
+                parentHealth.Damage(transform.forward * 360, hitForce, Damage);
 
-        //    if (isRecoiling)
-        //    {             
-        //        isRecoiling = false;
+                if (DamageCrosshair && PlayerController)
+                {
+                    Instantiate(DamageCrosshair, PlayerController.DamageCrosshairHolder.position, DamageCrosshair.transform.rotation, PlayerController.DamageCrosshairHolder);
+                }
 
-        //        // Apply the recoil
-        //        transform.localPosition = originalPosition;
-        //        transform.localRotation = originalRotation;
-        //    }
-        //}
+                if (parentHealth.CharacterAnimator && hitReaction != null && !parentHealth.CharacterAnimator.GetCurrentAnimatorStateInfo(1).IsName(hitReaction) && !parentHealth.CharacterAnimator.GetCurrentAnimatorStateInfo(0).IsName(hitReaction)) parentHealth.CharacterAnimator.Play(hitReaction);
+
+                for (int i = 0; i < impactBloodParticles.Length; i++)
+                {
+                    GameObject tempImpact;
+                    tempImpact = Instantiate(impactBloodParticles[i], damagePoint, impactBloodParticles[i].transform.rotation) as GameObject;
+                    tempImpact.transform.Rotate(Vector3.left * 90);
+
+                    Destroy(tempImpact, impactDespawnTime);
+                }
+               
+            }
+
+        }
 
 
         void cycleFire()
@@ -364,7 +434,7 @@ namespace PlanetMaenad.FPS
         {
             reloading = false;
 
-            BodyAnimator.SetBool("Reload", false);
+            PlayerController.BodyAnimator.SetBool("Reload", false);
 
             int bulletsToRemove = (bulletsPerMag - bulletsInMag);
             if (totalBullets >= bulletsPerMag)

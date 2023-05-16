@@ -6,12 +6,19 @@ namespace PlanetMaenad.FPS
 {
     public class FPSWeapon : MonoBehaviour
     {
-        public FPSPlayerController PlayerController;
-        public FPSCameraController FPSController;
-        public Animator BodyAnimator;
-        public Animator ArmsAnimator;
+        public DEMOExamplePlayer PlayerController;
+        [Space(10)]
+
+        public FPSArmsController PlayerArmsController;
+        public WeaponAdjuster WeaponAdjust;
+        [Space(5)]
         public GameObject mainCam;
         [Space(10)]
+
+
+
+        public KeyCode AttackButton = KeyCode.Mouse0;
+        public KeyCode AimButton = KeyCode.Mouse1;
 
         public bool UseFPSArmsConstant = true;
         public bool UseFPSArmsOnAttack = true;
@@ -19,32 +26,35 @@ namespace PlanetMaenad.FPS
         [Space(10)]
 
 
-        public HealthUIController HUDController;
-        public WeaponAdjuster WeaponAdjust;
-        public Vector3 aimCamPosition;
-        public Vector3 aimCamOffset = new Vector3(-15, 0, 0);
-        [Space(10)]
-
-
-        public bool UseRandomAttack;
-        [Range(-5, 5)] public int MinRandom;
-        [Range(-5, 5)] public int MaxRandom;
         public float MoveSetID = 1;
         public WeaponTypes Weapon;
         public int Damage;
+        [Space(5)]
         public GameObject[] SecondaryObjects;
         public MeleeTrigger[] Hitboxes;
         [Space(5)]
+        public bool UseRandomAttack;
+        [Range(-5, 5)] public int MinRandom;
+        [Range(-5, 5)] public int MaxRandom;
+        [Space(10)]
+
+
+        public Vector3 aimCamPosition;
+        public Vector3 aimCamOffset = new Vector3(-15, 0, 0);
+        public float originalCamFov = 60;
+        public float zoomInAmount = 50;
+        [Space(5)]
+        public float aimTime = 5;
+        public float aimInOutDuration = 0.1f;
+        [Space(10)]
+
+
+
         public bool attacking;
         public bool swapping;
         public bool sprinting;
         public bool aiming;
         [Space(10)]
-
-        public float originalCamFov = 60;
-        public float aimTime = 5;
-        public float zoomInAmount = 50;
-        public float aimInOutDuration = 0.1f;
 
 
 
@@ -68,11 +78,11 @@ namespace PlanetMaenad.FPS
 
             if (UseFPSArmsConstant)
             {
-                FPSController.LockFullbodyArms = true;
+                PlayerArmsController.LockFullbodyArms = true;
             }
             if (!UseFPSArmsConstant)
             {
-                FPSController.LockFullbodyArms = false;
+                PlayerArmsController.LockFullbodyArms = false;
             }
 
             if (Hitboxes.Length > 0)
@@ -85,32 +95,29 @@ namespace PlanetMaenad.FPS
         }
         void Start()
         {
-            if (!HUDController) HUDController = GameObject.FindGameObjectWithTag("HUD").GetComponent<HealthUIController>();
-
             originalCamPos = new Vector3(0, .35f, 0.15f);
         }
 
         void Update()
         {
             //Attack
-
-            if (Input.GetKeyDown(KeyCode.Mouse0) && Weapon == WeaponTypes.Melee)
+            if (Input.GetKeyDown(AttackButton) && Weapon == WeaponTypes.Melee)
             {
                
             }
 
-            if (Input.GetKey(KeyCode.Mouse0) && Weapon == WeaponTypes.Melee)
+            if (Input.GetKey(AttackButton) && Weapon == WeaponTypes.Melee)
             {            
-                if (UseRandomAttack && !ArmsAnimator.GetCurrentAnimatorStateInfo(0).IsName("RandomAttack"))
+                if (UseRandomAttack && !PlayerController.ArmsAnimator.GetCurrentAnimatorStateInfo(0).IsName("RandomAttack"))
                 {
                     float randomAttackFloat = Random.Range(MinRandom, MaxRandom);
-                    ArmsAnimator.SetFloat("RandomAttackID", randomAttackFloat);
-                    ArmsAnimator.Play("RandomAttack");
+                    PlayerController.ArmsAnimator.SetFloat("RandomAttackID", randomAttackFloat);
+                    PlayerController.ArmsAnimator.Play("RandomAttack");
                 }
 
                 if (UseFPSArmsOnAttack && !UseFPSArmsConstant)
                 {
-                    FPSController.LockFullbodyArms = true;
+                    PlayerArmsController.LockFullbodyArms = true;
                 }
 
                 if (Hitboxes.Length > 0)
@@ -123,11 +130,11 @@ namespace PlanetMaenad.FPS
               
                 attacking = true;
             }
-            if (Input.GetKeyUp(KeyCode.Mouse0) && Weapon == WeaponTypes.Melee)
+            if (Input.GetKeyUp(AttackButton) && Weapon == WeaponTypes.Melee)
             {
                 if (UseFPSArmsOnAttack && !UseFPSArmsConstant)
                 {
-                    FPSController.LockFullbodyArms = false;
+                    PlayerArmsController.LockFullbodyArms = false;
                 }
 
                 if (Hitboxes.Length > 0)
@@ -152,18 +159,18 @@ namespace PlanetMaenad.FPS
             }
 
             //PlayerAnimators
-            if (!UseRandomAttack) ArmsAnimator.SetBool("Attack", attacking);
-            ArmsAnimator.SetBool("Sprint", sprinting);
+            if (!UseRandomAttack) PlayerController.ArmsAnimator.SetBool("Attack", attacking);
+            PlayerController.ArmsAnimator.SetBool("Sprint", sprinting);
         }
         void LateUpdate()
         {
 
             //Aiming
-            if (Input.GetKeyDown(KeyCode.Mouse1) && aimFinished && !swapping)
+            if (Input.GetKeyDown(AimButton) && aimFinished && !swapping)
             {
                 if(UseFPSArmsOnAim && !UseFPSArmsConstant)
                 {
-                    FPSController.LockFullbodyArms = true;
+                    PlayerArmsController.LockFullbodyArms = true;
                 }
 
                 mainCam.transform.localEulerAngles = aimCamOffset;
@@ -171,18 +178,18 @@ namespace PlanetMaenad.FPS
                 originalAimOffsetCamPos = aimCamPosition;
                 aimCamPosition += originalCamPos;
 
-                ArmsAnimator.SetBool("Aiming", true);
-                BodyAnimator.SetFloat("idleAnimSpeed", 0);
+                PlayerController.ArmsAnimator.SetBool("Aiming", true);
+                PlayerController.BodyAnimator.SetFloat("idleAnimSpeed", 0);
 
                 aimTimeElapsed = 0;
                 aiming = true;
                 aimFinished = false;
             }
-            else if (Input.GetKeyUp(KeyCode.Mouse1) && aiming && !swapping)
+            else if (Input.GetKeyUp(AimButton) && aiming && !swapping)
             {
                 if (UseFPSArmsOnAim && !UseFPSArmsConstant)
                 {
-                    FPSController.LockFullbodyArms = false;
+                    PlayerArmsController.LockFullbodyArms = false;
                 }
 
                 mainCam.transform.localEulerAngles = Vector3.zero;
@@ -191,8 +198,8 @@ namespace PlanetMaenad.FPS
                 aimTimeElapsed = 0;
                 Invoke("aimingOutFinished", aimInOutDuration);
 
-                ArmsAnimator.SetBool("Aiming", false);
-                BodyAnimator.SetFloat("idleAnimSpeed", 1);
+                PlayerController.ArmsAnimator.SetBool("Aiming", false);
+                PlayerController.BodyAnimator.SetFloat("idleAnimSpeed", 1);
 
             }
 

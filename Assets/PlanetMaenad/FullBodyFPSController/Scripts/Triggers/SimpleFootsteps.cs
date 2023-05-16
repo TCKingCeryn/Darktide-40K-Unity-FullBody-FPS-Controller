@@ -6,7 +6,7 @@ namespace PlanetMaenad.FPS
     [Tooltip("IMPORTANT, this script needs to be on the root transform")]
     public class SimpleFootsteps : MonoBehaviour
     {
-        public FPSPlayerController PlayerController;
+        public FPSBodyController PlayerController;
         public Rigidbody _rigidbody;
         [Space(5)]
         public bool isAi;

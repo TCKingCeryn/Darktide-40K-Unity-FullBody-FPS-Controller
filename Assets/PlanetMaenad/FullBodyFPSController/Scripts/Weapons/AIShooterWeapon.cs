@@ -8,7 +8,6 @@ namespace PlanetMaenad.FPS
     [RequireComponent(typeof(AudioSource))]
     public class AIShooterWeapon : AIWeapon
     {
-
         public ShootTypes shootType;
         public bool reloading = false;
         public bool firing = false;
@@ -16,19 +15,37 @@ namespace PlanetMaenad.FPS
         [Space(10)]
 
 
-
-
         public GameObject shootPoint;
+        public LayerMask HitLayers = -1;
+        public string[] DamageTags;
         [Space(5)]
+        public bool UseRigidbodyBullet;
         public GameObject Bullet;
+        public float bulletVelocity;
+        public float bulletDespawnTime;
+        [Space(10)]
+
+        public float hitVolume = .35f;
+        public float hitForce = 5f;
+        public AudioClip[] hitSounds;
+        [Space(10)]
+
+
+        public int bulletsPerMag;
+        public int bulletsInMag;
+        public int totalBullets;
+        [Space(5)]
+        public float reloadTime;
+        public float grenadeTime;
+        public float fireRate;
+        [Space(10)]
+
+
+
         public float ShootVolume = .35f;
         public AudioClip fireSound;
         public float ReloadVolume = 0.35f;
         public AudioClip reloadSound;
-        [Space(5)]
-        public int bulletsPerMag;
-        public int bulletsInMag;
-        public int totalBullets;
         [Space(10)]
 
 
@@ -39,30 +56,32 @@ namespace PlanetMaenad.FPS
         public GameObject Mag;
         [Space(10)]
 
-        public float bulletVelocity;
-        public float bulletDespawnTime;
+   
         public float shellVelocity;
         public float magVelocity;
         public float shellDespawnTime;
         public float magDespawnTime;
         public float cycleTimeBoltAction;
         public float cycleTimeSemiAuto;
+        [Space(10)]
 
 
-        [Header("Timing")]
-        public float reloadTime;
-        public float grenadeTime;
-        public float fireRate;
+
+        public bool AutoDestroyImpacts;
+        public GameObject[] impactParticles;
+        public GameObject[] impactBloodParticles;
+        public float impactDespawnTime = 3f;
+
 
 
 
         internal bool throwing = false;
         internal bool cycling = false;
-
-
+        internal Vector3 currentShootPoint;
         internal Coroutine lastRoutine = null;
-     
+      
         public enum ShootTypes { SemiAuto, FullAuto, BoltAction };
+
 
 
         void OnEnable()
@@ -84,13 +103,8 @@ namespace PlanetMaenad.FPS
                 firing = false;
                 Reload();
             }
-
-            //AIAnimators
-            //if (AIAnimator) AIAnimator.SetBool("Fire", firing);
-
-            //AIAnimators
-            //if (AIAnimator) AIAnimator.SetBool("Fire", firing);
         }
+
 
         public void Fire()
         {
@@ -181,29 +195,6 @@ namespace PlanetMaenad.FPS
         {
             firing = false;
         }
-
-
-        IEnumerator shootBullet()
-        {
-            while (true)
-            {
-                yield return new WaitForSeconds(fireRate);
-
-                if (bulletsInMag > 0)
-                {
-                    gameObject.GetComponent<AudioSource>().PlayOneShot(fireSound, ShootVolume);
-
-                    foreach (ParticleSystem ps in muzzleFlashes)
-                    {
-                        ps.Play();
-                    }
-                    spawnBullet();
-                    spawnShell();
-                    bulletsInMag--;
-                }
-            }
-        }
-
         void reloadFinished()
         {
             reloading = false;
@@ -231,25 +222,98 @@ namespace PlanetMaenad.FPS
             }
         }
 
+        IEnumerator shootBullet()
+        {
+            while (true)
+            {
+                yield return new WaitForSeconds(fireRate);
+
+                if (bulletsInMag > 0)
+                {
+                    gameObject.GetComponent<AudioSource>().PlayOneShot(fireSound, ShootVolume);
+
+                    foreach (ParticleSystem ps in muzzleFlashes)
+                    {
+                        ps.Play();
+                    }
+                    spawnBullet();
+                    spawnShell();
+                    bulletsInMag--;
+                }
+            }
+        }
+
         void spawnBullet()
         {
-            GameObject tempBullet;
-            //Spawn bullet from the shoot point position, the true tip of the gun
-            tempBullet = Instantiate(Bullet, shootPoint.transform.position, shootPoint.transform.rotation) as GameObject;
-            tempBullet.GetComponent<RegisterDamageHit>().damage = Damage;
+            if (!UseRigidbodyBullet)
+            {
+                Vector3 rayOrigin = shootPoint.transform.position;
+                RaycastHit hit;
+                var rayDirection = currentShootPoint - shootPoint.transform.position;
 
-            //Orient it
-            tempBullet.transform.Rotate(Vector3.left * 90);
+                //Hits an Object
+                if (Physics.Raycast(rayOrigin, rayDirection, out hit, 1000 + 1, HitLayers))
+                {
+                    var hitTransform = hit.collider.transform;
 
-            //Add forward force based on where camera is pointing
-            Rigidbody tempRigidBody;
-            tempRigidBody = tempBullet.GetComponent<Rigidbody>();
+                    for (int i = 0; i < DamageTags.Length; i++)
+                    {       
+                        //Can See Target
+                        if (hitTransform.CompareTag(DamageTags[i]))
+                        {
+                            PassDamage(hitTransform.gameObject, hit.point);
+                        }
+                    }
 
-            //Always shoot towards where camera is facing
-            tempRigidBody.AddForce(shootPoint.transform.forward * bulletVelocity);
+                    if (hitSounds.Length > 0)
+                    {
+                        float random = Random.Range(0f, 1f);
 
-            //Destroy after time
-            Destroy(tempBullet, bulletDespawnTime);
+                        if (random <= 0.3f)
+                        {
+                            int randomIndex = Random.Range(0, hitSounds.Length);
+                            AudioSource.PlayClipAtPoint(hitSounds[randomIndex], transform.position, hitVolume);
+                        }
+                    }
+
+
+                    for (int i = 0; i < impactParticles.Length; i++)
+                    {
+                        GameObject tempImpact;
+                        tempImpact = Instantiate(impactParticles[i], hit.point, impactParticles[i].transform.rotation) as GameObject;
+                        tempImpact.transform.Rotate(Vector3.left * 90);
+
+                        Destroy(tempImpact, impactDespawnTime);
+
+                        if (hitTransform.GetComponent<Rigidbody>())
+                        {
+                            hitTransform.GetComponent<Rigidbody>().AddForce(shootPoint.transform.forward * 1 * hitForce);
+                        }
+                    }
+                   
+                }
+            }
+
+            if (UseRigidbodyBullet && Bullet)
+            {
+                GameObject tempBullet;
+                tempBullet = Instantiate(Bullet, shootPoint.transform.position, shootPoint.transform.rotation) as GameObject;
+                tempBullet.GetComponent<RegisterDamageHit>().Damage = Damage;
+
+                tempBullet.transform.Rotate(Vector3.left * 90);
+
+
+
+                //Add forward force based on where camera is pointing
+                Rigidbody tempRigidBody;
+                tempRigidBody = tempBullet.GetComponent<Rigidbody>();
+
+                //Always shoot towards where camera is facing
+                tempRigidBody.AddForce(shootPoint.transform.forward * bulletVelocity);
+
+                //Destroy after time
+                Destroy(tempBullet, bulletDespawnTime);
+            }
         }
         void spawnShell()
         {
@@ -285,5 +349,27 @@ namespace PlanetMaenad.FPS
             //Destroy after time
             Destroy(tempMag, magDespawnTime);
         }
+
+
+        public void PassDamage(GameObject other, Vector3 damagePoint)
+        {
+            if (other.GetComponentInParent<HealthController>())
+            {
+                var parentHealth = other.GetComponentInParent<HealthController>();
+                parentHealth.Damage(transform.forward * 360, hitForce, Damage);
+
+                for (int i = 0; i < impactBloodParticles.Length; i++)
+                {
+                    GameObject tempImpact;
+                    tempImpact = Instantiate(impactBloodParticles[i], damagePoint, impactBloodParticles[i].transform.rotation) as GameObject;
+                    tempImpact.transform.Rotate(Vector3.left * 90);
+
+                    Destroy(tempImpact, impactDespawnTime);
+                }
+                
+            }
+
+        }
+
     }
 }
